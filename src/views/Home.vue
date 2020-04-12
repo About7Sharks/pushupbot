@@ -44,7 +44,7 @@
         const flip = true; // whether to flip the webcam
         this.webcam = new tmImage.Webcam(300, 300, flip); // width, height, flip
         await this.webcam.setup({             
-                facingMode: "user"
+               options:{ facingMode: "user"}
         }); // request access to the webcam
         await this.webcam.play();
         window.requestAnimationFrame(this.loop);
