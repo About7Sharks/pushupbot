@@ -5,7 +5,8 @@
       <!-- <h1>Welcome To Push Up Coach</h1> -->
          <h1> Push Ups</h1> 
          <h2>{{counter}}</h2>  
-    <b-button variant=outline-light @click="init()">Start Set</b-button>
+    <b-button v-if="!setStarted" variant=outline-light @click="init()">Start Set</b-button>
+    <b-button v-else @click="stop()">End Set</b-button>
     </div>
     <video id="video" width="300" height="300" playsinline autoplay></video>
    </div>
@@ -29,44 +30,37 @@
         downProb:0,
         upProb:0,
         currentPosistion:'',
-        counter:0
+        counter:0,
+        setStarted:false,
       }
     },
     async mounted(){
     },
     methods: {
       async init() {
+        this.setStarted=true
         this.video = document.getElementById('video');
         const modelURL = this.URL + "model.json";
         const metadataURL = this.URL + "metadata.json";
         this.model = await tmImage.load(modelURL, metadataURL);
         this.maxPredictions = this.model.getTotalClasses();
-        console.log(navigator.mediaDevices)
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-       await navigator.mediaDevices.getUserMedia({
-          video: true,
-          facingMode: { exact: "user" }
-        }).then(stream => {
-          this.video.srcObject = stream;
-          this.video.play();
-        });
-      }
-
-        console.log(video)
-
-        // const flip = true; // whether to flip the webcam
-        // this.webcam = new tmImage.Webcam(300, 300, flip); // width, height, flip
-        // await this.webcam.setup()
-        // await this.webcam.play();
+          await navigator.mediaDevices.getUserMedia({
+              video: {
+                width: { ideal: 300 },
+                height: { ideal: 300 }
+              },
+              facingMode: { exact: "user" }
+            }).then(stream => {
+              this.video.srcObject = stream;
+              this.video.play();
+            });
+        }
         window.requestAnimationFrame(this.loop);
-        // append elements to the DOM
-        // let webCamContainer= document.getElementById("webcam-container")
-        // webCamContainer.childNodes.length>0?webCamContainer.removeChild(webCamContainer.childNodes[0]):''
-        // webCamContainer.appendChild(video);
-        // this.labelContainer = document.getElementById("label-container");
-        // for (let i = 0; i < this.maxPredictions; i++) { // and class labels
-        //   this.labelContainer.appendChild(document.createElement("div"));
-        // }
+      },
+      async stop(){
+        this.setStarted=false
+        this.video.pause()
       },
 
       async loop() {
