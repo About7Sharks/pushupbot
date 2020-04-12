@@ -33,6 +33,7 @@
     },
     mounted(){
       // this.init()
+      console.log(navigator.mediaDevices.getSupportedConstraints())
     },
     methods: {
       async init() {
@@ -42,7 +43,9 @@
         this.maxPredictions = this.model.getTotalClasses();
         const flip = true; // whether to flip the webcam
         this.webcam = new tmImage.Webcam(300, 300, flip); // width, height, flip
-        await this.webcam.setup(); // request access to the webcam
+        await this.webcam.setup({             
+                facingMode: "user"
+        }); // request access to the webcam
         await this.webcam.play();
         window.requestAnimationFrame(this.loop);
         // append elements to the DOM
