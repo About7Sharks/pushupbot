@@ -7,7 +7,7 @@
          <h2>{{counter}}</h2>  
     <b-button variant=outline-light @click="init()">Start Set</b-button>
     </div>
-    <video id="video" width="300" height="300" autoplay></video>
+    <video id="video" width="300" height="300" playsinline autoplay></video>
    </div>
     <!-- <div id="label-container"></div> -->
     <!-- {{currentPosistion}}
