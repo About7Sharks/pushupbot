@@ -7,7 +7,7 @@
          <h2>{{counter}}</h2>  
     <b-button variant=outline-light @click="init()">Start Set</b-button>
     </div>
-    <div id="webcam-container"></div>
+    <video id="video" width="300" height="300" autoplay></video>
    </div>
     <!-- <div id="label-container"></div> -->
     <!-- {{currentPosistion}}
@@ -23,6 +23,7 @@
         URL:"https://teachablemachine.withgoogle.com/models/DoymK5tqx/",
         model:{},
         webcam:{},
+        video:{},
         labelContainer:{},
         maxPredictions:{},
         downProb:0,
@@ -31,42 +32,51 @@
         counter:0
       }
     },
-    mounted(){
-      // this.init()
-      console.log(navigator.mediaDevices.getSupportedConstraints())
+    async mounted(){
     },
     methods: {
       async init() {
+        this.video = document.getElementById('video');
         const modelURL = this.URL + "model.json";
         const metadataURL = this.URL + "metadata.json";
         this.model = await tmImage.load(modelURL, metadataURL);
         this.maxPredictions = this.model.getTotalClasses();
-        const flip = true; // whether to flip the webcam
-        this.webcam = new tmImage.Webcam(300, 300, flip); // width, height, flip
-        await this.webcam.setup({             
-               options:{ facingMode: "user"}
-        }); // request access to the webcam
-        await this.webcam.play();
+        console.log(navigator.mediaDevices)
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+       await navigator.mediaDevices.getUserMedia({
+          video: true,
+          facingMode: { exact: "user" }
+        }).then(stream => {
+          this.video.srcObject = stream;
+          this.video.play();
+        });
+      }
+
+        console.log(video)
+
+        // const flip = true; // whether to flip the webcam
+        // this.webcam = new tmImage.Webcam(300, 300, flip); // width, height, flip
+        // await this.webcam.setup()
+        // await this.webcam.play();
         window.requestAnimationFrame(this.loop);
         // append elements to the DOM
-        let webCamContainer= document.getElementById("webcam-container")
-        webCamContainer.childNodes.length>0?webCamContainer.removeChild(webCamContainer.childNodes[0]):''
-        webCamContainer.appendChild(this.webcam.canvas);
-        this.labelContainer = document.getElementById("label-container");
-        for (let i = 0; i < this.maxPredictions; i++) { // and class labels
-          this.labelContainer.appendChild(document.createElement("div"));
-        }
+        // let webCamContainer= document.getElementById("webcam-container")
+        // webCamContainer.childNodes.length>0?webCamContainer.removeChild(webCamContainer.childNodes[0]):''
+        // webCamContainer.appendChild(video);
+        // this.labelContainer = document.getElementById("label-container");
+        // for (let i = 0; i < this.maxPredictions; i++) { // and class labels
+        //   this.labelContainer.appendChild(document.createElement("div"));
+        // }
       },
 
       async loop() {
-        this.webcam.update(); // update the webcam frame
+        // this.webcam.update(); // update the webcam frame
         await this.predict();
         window.requestAnimationFrame(this.loop);
       },
 
       async predict() {
-        const prediction = await this.model.predict(this.webcam.canvas);
-        console.log(prediction[0].probability)
+        const prediction = await this.model.predict(this.video);
         this.downProb=prediction[0].probability
         this.upProb=prediction[1].probability
         
@@ -142,7 +152,7 @@
       border-bottom-left-radius: 25px;
     }
   }
-  #webcam-container{
+  #video{
     border-left: 1px solid white;
     margin: 0 auto;
     width: 300px;
@@ -159,7 +169,7 @@
         border-bottom-left-radius: 0px;
       }
     }
-    #webcam-container{
+    #video{
       border: none;
     }
    }
